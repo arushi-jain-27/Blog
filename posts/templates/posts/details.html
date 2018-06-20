@@ -1,0 +1,74 @@
+{%  extends "posts/base.html" %}
+{% block body %}
+<html>
+
+<body>
+
+<h1>{{post.title}} </h1>
+<h2>{{post.user}}</h2>
+<h3>posted:{{post.posted_on}},updated:{{post.modified_on}}</h3>
+<h3>{{post.description}}</h3>
+<img src="{{post.image.url}}">
+<p>{{post.body|linebreaks}}</p>
+
+<p>
+<a href="{% url "posts:post_share" post.id %}">
+Share this post
+</a>
+</p>
+{% if bookmark %}
+	<img src="http://i.imgur.com/b9b13Rd.png" />
+{% endif %}
+{% if post.user == request.user %}
+<a href="{% url 'posts:update_post' post.id %}" >Edit Post </a>
+<form action="{% url 'posts:delete_post' post.id %}" method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="comment_id" value="{{ comment.id }}" />
+                                <button type="submit" class="btn btn-default btn-sm">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                </button>
+            </form> 
+{% endif %}
+
+<br/><a href="{% url 'posts:add_favorite' post.id %}" button type="submit" class="btn btn-success">Mark as Favorite </button></a>
+<h2>Similar posts</h2>
+{% for post in similar_posts %}
+<p>
+<a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+</p>
+{% empty %}
+There are no similar posts yet.
+{% endfor %}
+
+{% with comments.count as total_comments %}
+<h3>
+{{ total_comments }} comment{{ total_comments|pluralize }}
+</h3>
+{% endwith %}
+
+{% for comment in comments %}
+
+<h4>{{comment.user}}</h4>
+<h6>posted:{{comment.created}},updated:{{comment.updated}}</h6>
+<p>{{comment.body}}</p>
+{% if comment.user == request.user %}
+<form action="{% url 'posts:delete_comment' post.id comment.id %}" method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="comment_id" value="{{ comment.id }}" />
+                                <button type="submit" class="btn btn-default btn-sm">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                </button>
+            </form> 
+<a href="{% url 'posts:update_comment' comment.id %}" >Edit Comment </a>
+
+{% endif %}
+{% endfor %}
+
+{% if new_comment %}
+<h2>Your comment has been added.</h2>
+{% endif %}
+<br/><a href="{% url 'posts:create_comment' post.id %}" button type="submit" class="btn btn-success">Add a Comment </button></a>
+
+</body>
+</html>
+{% endblock %}
