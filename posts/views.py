@@ -1,4 +1,4 @@
-from .forms import PostForm, CommentForm, UserForm, EmailPostForm, SearchForm
+from .forms import PostForm, CommentForm, UserForm, EmailPostForm, SearchForm, ProfileEditForm
 from haystack.query import SearchQuerySet
 from .models import Post,Comment, PostFavorite
 from django.http import Http404
@@ -17,6 +17,16 @@ from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 
+def edit(request):
+	if request.method == 'POST':	
+		profile_form = ProfileEditForm(instance=request.user.profile, data=request.POST, files=request.FILES)
+		if profile_form.is_valid():
+			profile_form.save()
+			messages.success(request, 'Profile updated successfully')
+	else:		
+		profile_form = ProfileEditForm(instance=request.user.profile)
+		messages.error(request, 'Error updating your profile')
+	return render(request, 'posts/edit.html', {'profile_form': profile_form})
 
 def logout_user(request):
     logout(request)

@@ -25,7 +25,7 @@ SECRET_KEY = 'c*8*x*py=btx7542^$x5&c0(9oq!aj@$9_rr@$0e*r1x@^_ohf'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.196.0.56']
+ALLOWED_HOSTS = ['10.196.0.56', 'localhost']
 
 
 # Application definition

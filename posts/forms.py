@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django import forms
-from .models import Post, Comment, PostFavorite
+from .models import Post, Comment, PostFavorite, Profile
 from taggit.forms import *
 
 class UserForm (forms.ModelForm):
@@ -31,3 +31,8 @@ class EmailPostForm(forms.Form):
 
 class SearchForm(forms.Form):
 	query = forms.CharField()
+	
+class ProfileEditForm(forms.ModelForm):
+	class Meta:
+		model = Profile
+		fields = ('name', 'date_of_birth', 'photo')
