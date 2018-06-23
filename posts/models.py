@@ -24,6 +24,7 @@ class Post (models.Model):
 	title=models.CharField(max_length=50)
 	description=models.CharField (max_length=100)
 	body=models.TextField ()
+	url=models.URLField (blank=True)
 	posted_on=models.DateTimeField (auto_now_add=True)
 	modified_on=models.DateTimeField (auto_now=True)
 	image=models.FileField()

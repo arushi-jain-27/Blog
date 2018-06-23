@@ -19,6 +19,7 @@ urlpatterns = [
 	 path('',views.index, name='index' ),	 
 	 path('favorite/<post_id>', views.add_favorite, name='add_favorite'),
 	 path('create_post/', views.create_post, name='create_post'),
+	 path ('link_post/', views.link_post, name='link_post'),
 	 path('update_post/<pk>', views.update_post.as_view(), name='update_post'),
 	 path('update_comment/<pk>', views.update_comment.as_view(), name='update_comment'),
 	 path('<post_id>/create_comment/', views.create_comment, name='create_comment'),

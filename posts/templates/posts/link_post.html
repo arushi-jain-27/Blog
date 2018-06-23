@@ -1,0 +1,11 @@
+{% extends "posts/base.html" %}
+{% block title %}Link a Post{% endblock %}
+{% block body %}
+<h1>Link a Post</h1>
+<img src="{{ request.GET.url }}" class="image-preview">
+<form action="." method="post">
+{{ form.as_p }}
+{% csrf_token %}
+<input type="submit" value="Link it!">
+</form>
+{% endblock %}
