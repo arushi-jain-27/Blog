@@ -61,10 +61,41 @@ def logout_user(request):
     }
     return render(request, 'posts/login.html', context)
 
+def login_user (request, tag_slug = None):
+	if request.method == "POST":
+		username = request.POST['username']
+		password = request.POST['password']
+		user = authenticate (username=username, password=password)
+		if user is not None:
+			if user.is_active:
+				login (request, user)
+				all_posts = Post.objects.filter(user=request.user, status="published")
+
+				tag = None
+				if tag_slug:
+					tag = get_object_or_404 (Tag, slug=tag_slug)
+					all_posts = all_posts.filter(tags__in =[tag])
+				paginator = Paginator (all_posts, 10)
+				page = request.GET.get('page')
+				try:
+					posts = paginator.page(page)
+				except PageNotAnInteger:
+					posts = paginator.page(1)
+				except EmptyPage:
+					posts = paginator.page(paginator.num_pages)
+				return render (request, "posts/dashboard.html",{'drafts':Post.objects.filter(user=request.user, status="draft"), 'page': page, 'all_posts': posts, 'tag': tag, 'profile':user.profile})
+			else:
+				return render (request, 'posts/login.html', {'error_message': 'Your account has been disabled'})
+		else:
+			return render (request, 'posts/login.html', {'error_message': 'Invalid login'})
+	return render(request, 'posts/login.html')
 
 
-	
-def login_user(request):
+
+
+
+"""	
+def login_user(request, tag_slug = None):
     if request.method == "POST":
         username = request.POST['username']
         password = request.POST['password']
@@ -72,15 +103,31 @@ def login_user(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
-                post = Post.objects.filter(user=request.user)
-                return render(request, 'posts/index.html', {'all_posts': post})
+                all_posts = Post.objects.filter(user=request.user)
+                tag = None
+                if tag_slug:
+                    tag = get_object_or_404(Tag, slug=tag_slug)
+                    all_posts = all_posts.filter(tags__in=[tag])
+
+                paginator = Paginator(all_posts, 10)  # 10 posts in each page
+                page = request.GET.get('page')
+                try:
+                    posts = paginator.page(page)
+                except PageNotAnInteger:
+                    posts = paginator.page(1)# If page is not an integer deliver the first page
+                except EmptyPage:
+					# If page is out of range deliver last page of results
+					posts = paginator.page(paginator.num_pages)
+				# return render(request,'posts/index.html',{'all_posts': all_posts})
+				return render(request, 'posts/index.html', {'page': page, 'all_posts': posts, 'tag': tag})
+
             else:
                 return render(request, 'posts/login.html', {'error_message': 'Your account has been disabled'})
         else:
             return render(request, 'posts/login.html', {'error_message': 'Invalid login'})
     return render(request, 'posts/login.html')
 
-
+"""
 def register(request):
     form = UserForm(request.POST or None)
     if form.is_valid():
