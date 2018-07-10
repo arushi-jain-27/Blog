@@ -14,6 +14,8 @@ class Profile(models.Model):
 	photo = models.ImageField(upload_to='users/%Y/%m/%d', blank=True)
 	def __str__(self):
 		return 'Profile for user {}'.format(self.user.username)
+	def get_absolute_url(self):
+		return reverse ('posts:user_detail', args=[self.user.username])
 
 
 class Contact(models.Model):

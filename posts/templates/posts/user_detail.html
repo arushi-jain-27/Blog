@@ -1,12 +1,12 @@
 {% extends "posts/base.html" %}
-{% load thumbnail %}
-{% block title %}Dashboard{% endblock %}
+   {% load thumbnail %}
+{% block title %}User Profile{% endblock %}
 {% block body %}
-<h1>Dashboard</h1>
-    <h1>Welcome {{ request.user.username }}!</h1>
-<h2> {{  profile.date_of_birth }} </h2>
-    <img src="{{profile.photo.url}}">
-<h3> Your Posts </h3>
+
+    <h1>{{ user.username }}'s Profile</h1>
+<h2>Born  {{  user.profile.date_of_birth }} </h2>
+    <img src="{{user.profile.photo.url}}">
+<h3> {{ user.username }}'s Posts </h3>
     {% if all_posts %}
 	{% if tag %}
 		<h2>Posts tagged with "{{ tag.name }}"</h2>
@@ -14,8 +14,7 @@
 
 	{% for post in all_posts %}
 
-
-		<p class="posts">
+        <p class="posts">
         {% thumbnail post.image "180x180" crop="100%" as im %}
         <img src="{{ im.url }}">
 
@@ -33,27 +32,33 @@
             {% empty %}
 
 		</p>
-		<form action="{% url 'posts:delete_post' post.id %}" method="post" style="display: inline;">
-                                {% csrf_token %}
-                                <input type="hidden" name="post_id" value="{{ post.id }}" />
-                                <button type="submit" class="btn btn-default btn-sm">
-                                    <span class="glyphicon glyphicon-trash"></span>
-                                </button>
-            </form>
 
 
 	{% endfor %}
 {% else %}
 	<h2>Zero Posts </h2>
 {% endif %}
-{% include "posts/pagination.html" with page=all_posts %}
-    <h3>Your Drafts</h3>
-    {% for post in drafts %}
-        <li>
-            <a href="{% url 'posts:update_post' post.id %}"> {{ post.title }} </a>
-        </li>
+    {% with total_followers=user.followers.count %}
+<span class="count">
+<span class="total">{{ total_followers }}</span>
+follower{{ total_followers|pluralize }}
+</span>
+    {% endwith %}
+      {% with total_following=user.following.count %}
+<span class="count">
+follows {{ total_following }} people
+</span>
+    {% endwith %}
+<a href="{% url "posts:user_follow" user.username %}"  class="followbutton">
+{% if request.user not in user.followers.all %}
+    Follow
+{% else %}
+Unfollow
+{% endif %}
+</a>
 
-    {% endfor %}
+
+
 
 {% comment %}
 {% with total_images_created=request.user.images_created.count %}
@@ -67,3 +72,4 @@ images from other websites → <a href="javascript:{% include
 <a href="{% url "password_change" %}">change your password</a>.<p>
 {% endcomment %}
 {% endblock %}
+}

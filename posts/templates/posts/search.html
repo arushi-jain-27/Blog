@@ -6,12 +6,16 @@
 <h1>Posts containing "{{ cd.query }}"</h1>
 <h3>Found {{ total_results }} result{{ total_results|pluralize}}</h3>
 {% for post in results %}
-
 <h4><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h4>
 {{ post.description }}
+{% empty %}
+<p>There are no posts for your query.</p>
+{% endfor %}
+    {% for person in people %}
+<h4><a href="{% url 'posts:user_detail person' %}">{{ person.name }}</a></h4>
 
 {% empty %}
-<p>There are no results for your query.</p>
+<p>There are no people for your query.</p>
 {% endfor %}
 <p><a href="{% url 'posts:post_search' %}">Search again</a></p>
 {% else %}

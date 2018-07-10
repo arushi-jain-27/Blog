@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+from django.urls import reverse, reverse_lazy
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,9 +26,9 @@ SECRET_KEY = 'c*8*x*py=btx7542^$x5&c0(9oq!aj@$9_rr@$0e*r1x@^_ohf'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.196.0.56', 'localhost']
+ALLOWED_HOSTS = ['localhost']
 
-
+ABSOLUTE_URL_OVERRIDES = {'auth.user': lambda u: reverse_lazy('posts:user_detail',args=[u.username])}
 # Application definition
 HAYSTACK_CONNECTIONS = {
 'default': {
@@ -39,6 +40,7 @@ SITE_ID=1
 INSTALLED_APPS = [
 	'haystack',
 	'taggit',
+    'easy_thumbnails',
 	'account.apps.AccountConfig',
 	'posts.apps.PostsConfig',
     'django.contrib.admin',

@@ -42,6 +42,10 @@ urlpatterns = [
 	 
 	 #path('<post_id>/', views.detail, name='detail'),
 	 path('<year>/<month>/<day>/<post>', views.detail, name='detail'),
+	 path ('user_list', views.user_list, name = "user_list"),
+	 path ('user_follow/<to>', views.user_follow, name = "user_follow"),
+	 path ('user_detail/<username>', views.user_detail, name = "user_detail")
+
 	 #path('<Post_id>/favorite', views.favorite, name='favorite'),
 
 	

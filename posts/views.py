@@ -1,10 +1,8 @@
 from .forms import PostForm, CommentForm, UserForm, EmailPostForm, SearchForm, ProfileEditForm, SharedPostForm
 from haystack.query import SearchQuerySet
-from .models import Post,Comment, PostFavorite
-from django.http import Http404
+from .models import Post,Comment, PostFavorite, User, Profile, Contact
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
-from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, View
@@ -17,6 +15,22 @@ from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from common.decorators import ajax_required
+
+
+@login_required
+def user_follow (request, to):
+	user = User.objects.get(username=to)
+	all_posts = Post.objects.filter(status="published", user=user)
+	if request.user in user.followers.all():
+		Contact.objects.filter(user_from=request.user, user_to=user).delete()
+	else:
+		Contact.objects.get_or_create(user_from=request.user, user_to=user)
+	return render(request, 'posts/user_detail.html', {'user': user, 'all_posts': all_posts})
+
+
 
 @login_required
 def link_post(request):
@@ -111,6 +125,16 @@ def register(request):
     }
     return render(request, 'posts/register.html', context)
 
+def user_list (request):
+	users = User.objects.filter (is_active = True)
+	return render (request, 'posts/user_list.html', {'users': users})
+
+def user_detail (request, username):
+	user = get_object_or_404 (User, username = username, is_active = True)
+	all_posts = Post.objects.filter(status="published", user=user)
+	return render (request, 'posts/user_detail.html', {'user':user, 'all_posts':all_posts})
+
+
 def create_post(request):
     if not request.user.is_authenticated:
         return render(request, 'posts/login.html')
@@ -199,7 +223,7 @@ def index (request, tag_slug=None):
 		tag=get_object_or_404 (Tag, slug=tag_slug)
 		all_posts=all_posts.filter (tags__in=[tag])
 		
-	paginator = Paginator(all_posts, 10) # 10 posts in each page
+	paginator = Paginator(all_posts, 3) # 10 posts in each page
 	page = request.GET.get('page')
 	try:
 		posts = paginator.page(page)
@@ -257,12 +281,12 @@ def post_search(request):
         if form.is_valid():
             cd = form.cleaned_data
             results = Post.objects.filter(Q(title__icontains=cd['query'])|Q(user__username__icontains=cd['query'] )| Q(tags__name__icontains=cd['query']) ).distinct()
-            
+            people = Profile.objects.filter (Q(name__icontains=cd['query']))
             #results = Post.objects.all()
             #results = SearchQuerySet().models(Post).filter(content=cd['query']).load_all()
             # count total results
-            total_results = results.count()
-            return render(request, 'posts/search.html', {'form': form,'cd': cd, 'results': results,'total_results': total_results})
+            total_results = results.count()+people.count()
+            return render(request, 'posts/search.html', {'form': form,'cd': cd, 'results': results, 'people':people, 'total_results': total_results})
     else:
         #form=SearchForm ()
         return render(request, 'posts/search.html', {'form': form})
