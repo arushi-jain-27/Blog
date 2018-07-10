@@ -5,11 +5,11 @@
 {% if "query" in request.GET %}
 <h1>Posts containing "{{ cd.query }}"</h1>
 <h3>Found {{ total_results }} result{{ total_results|pluralize}}</h3>
-{% for result in results %}
-{% with post=result.object %}
+{% for post in results %}
+
 <h4><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h4>
 {{ post.description }}
-{% endwith %}
+
 {% empty %}
 <p>There are no results for your query.</p>
 {% endfor %}

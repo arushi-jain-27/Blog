@@ -92,42 +92,6 @@ def login_user (request, tag_slug = None):
 
 
 
-
-
-"""	
-def login_user(request, tag_slug = None):
-    if request.method == "POST":
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                login(request, user)
-                all_posts = Post.objects.filter(user=request.user)
-                tag = None
-                if tag_slug:
-                    tag = get_object_or_404(Tag, slug=tag_slug)
-                    all_posts = all_posts.filter(tags__in=[tag])
-
-                paginator = Paginator(all_posts, 10)  # 10 posts in each page
-                page = request.GET.get('page')
-                try:
-                    posts = paginator.page(page)
-                except PageNotAnInteger:
-                    posts = paginator.page(1)# If page is not an integer deliver the first page
-                except EmptyPage:
-					# If page is out of range deliver last page of results
-					posts = paginator.page(paginator.num_pages)
-				# return render(request,'posts/index.html',{'all_posts': all_posts})
-				return render(request, 'posts/index.html', {'page': page, 'all_posts': posts, 'tag': tag})
-
-            else:
-                return render(request, 'posts/login.html', {'error_message': 'Your account has been disabled'})
-        else:
-            return render(request, 'posts/login.html', {'error_message': 'Invalid login'})
-    return render(request, 'posts/login.html')
-
-"""
 def register(request):
     form = UserForm(request.POST or None)
     if form.is_valid():
@@ -212,42 +176,8 @@ def add_favorite (request, post_id):
 			bookmark=PostFavorite(user=request.user, post=post)
 			bookmark.save()
 		return render(request, 'posts/details.html', {'post': post, 'bookmark':bookmark, 'comments':comments})
-		"""
-		if form.is_valid():
-			fav = form.save(commit=False)
-			fav.post = post
-			fav.user = request.user
-			fav.save()
-			return render(request, 'posts/details.html', {'post': post})
-		context = {
-			'post': post,
-			'form': form,
-		}
-		return render(request, 'posts/favorite.html', context)
-		"""
-"""
-class PostFavoriteView(View):
-    # This variable will set the bookmark model to be processed
-    
 
-    def post(self, request, pk):
-        # We need a user
-        user = auth.get_user(request)
-        # Trying to get a bookmark from the table, or create a new one
-        bookmark, created = self.PostFavorite.objects.get_or_create(user=user, post_id=pk)
-        # If no new bookmark has been created,
-        # Then we believe that the request was to delete the bookmark
-        if not created:
-            bookmark.delete()
 
-        return HttpResponse(
-            json.dumps({
-                "result": created,
-                "count": self.model.objects.filter(post_id=pk).count()
-            }),
-            #content_type="application/json"
-        )  
-"""		
 def delete_post(request, post_id):
     post = Post.objects.get(pk=post_id)
     post.delete()
@@ -261,13 +191,7 @@ def delete_comment(request, post_id, comment_id):
 	#comments = post.comment_set.filter (active = True)
     comment.delete()
     return render(request, 'posts/details.html', {'post': post,'comments': post.comment_set.filter (active = True)}) 
-"""
-class PostListView(ListView):
-	queryset = Post.objects.all()
-	context_object_name = 'all_posts'
-	paginate_by = 10
-	template_name = 'posts/index.html'
-"""		
+
 def index (request, tag_slug=None):
 	all_posts=Post.objects.filter(status="published")
 	tag=None
@@ -332,7 +256,10 @@ def post_search(request):
         form = SearchForm(request.GET)
         if form.is_valid():
             cd = form.cleaned_data
-            results = SearchQuerySet().models(Post).filter(content=cd['query']).load_all()
+            results = Post.objects.filter(Q(title__icontains=cd['query'])|Q(user__username__icontains=cd['query'] )| Q(tags__name__icontains=cd['query']) ).distinct()
+            
+            #results = Post.objects.all()
+            #results = SearchQuerySet().models(Post).filter(content=cd['query']).load_all()
             # count total results
             total_results = results.count()
             return render(request, 'posts/search.html', {'form': form,'cd': cd, 'results': results,'total_results': total_results})
@@ -361,72 +288,6 @@ def change_password(request):
 			form = PasswordChangeForm(request.user)
 			
 			return render(request, 'posts/password_change_form.html', {'form': form  })
-
-
-		
-
-
-"""
-from django.views import generic
-from .models import Post
-from django.contrib.auth import authenticate, login
-from django.views.generic import View
-from django.shortcuts import render, redirect
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
-from .forms import UserForm
-
-class IndexView (generic.ListView):
-	template_name='posts/index.html'	
-	def get_queryset(self):
-		return Post.objects.all()
-		
-class DetailView (generic.DetailView):
-	model=Post
-	template_name='posts/details.html'
-
-class PostCreate(CreateView):
-	model=Post
-	fields=['title', 'description', 'body', 'image']
-	
-class PostUpdate(UpdateView):
-	model=Post
-	fields=['title', 'description', 'body', 'image']
-	
-class PostDelete(DeleteView):
-	model=Post
-	success_url=reverse_lazy('posts:index')
-
-class UserFormView(View):
-	form_class=UserForm
-	template_name='posts/registration_form.html'
-	
-	def get(self, request):
-		form=self.form_class(None)
-		return render (request, self.template_name,{'form':form})
-		
-	def post (self, request):
-		form=self.form_class(request.POST)
-		
-		if form.is_valid():
-			user=form.save(commit=False)
-			
-			# cleaned (normalized) data
-			username=form.cleaned_data['username']
-			password=form.cleaned_data['password']
-			user.set_password(password)
-			user.save()
-			
-			#return user objects if credentials are correct
-			user=authenticate(username=username,password=password)
-			
-			if user is not None:
-				if user.is_active:
-					login(request,user)
-					return redirect('posts:index')
-
-		return render (request, self.template_name,{'form':form})
-"""
 
 	
 
