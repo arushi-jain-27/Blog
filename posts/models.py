@@ -5,6 +5,8 @@ from django.urls import reverse
 from django.utils import timezone
 import datetime
 from taggit.managers import TaggableManager
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 # Create your models here.
 
 class Profile(models.Model):
@@ -16,6 +18,17 @@ class Profile(models.Model):
 		return 'Profile for user {}'.format(self.user.username)
 	def get_absolute_url(self):
 		return reverse ('posts:user_detail', args=[self.user.username])
+
+
+class Action(models.Model):
+	user = models.ForeignKey(User, related_name='actions',	db_index=True, on_delete=models.CASCADE)
+	verb = models.CharField(max_length=255)
+	target_ct = models.ForeignKey(ContentType,	blank=True,	null=True,	related_name='target_obj', on_delete=models.CASCADE)
+	target_id = models.PositiveIntegerField(null=True,	blank=True,	db_index=True)
+	target = GenericForeignKey('target_ct', 'target_id')
+	created = models.DateTimeField(auto_now_add=True, db_index=True)
+	class Meta:
+		ordering = ('-created',)
 
 
 class Contact(models.Model):

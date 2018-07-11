@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Post, Comment, Profile, Contact
+from .models import Post, Comment, Profile, Contact, Action
 
 
 
@@ -27,3 +27,9 @@ admin.site.register(Profile, ProfileAdmin)
 class ContactAdmin(admin.ModelAdmin):
 	list_display = ['user_from', 'user_to', 'created']
 admin.site.register(Contact, ContactAdmin)
+
+class ActionAdmin(admin.ModelAdmin):
+	list_display = ('user', 'verb', 'target', 'created')
+	list_filter = ('created',)
+	search_fields = ('verb',)
+admin.site.register(Action, ActionAdmin)

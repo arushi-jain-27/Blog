@@ -1,6 +1,6 @@
 from .forms import PostForm, CommentForm, UserForm, EmailPostForm, SearchForm, ProfileEditForm, SharedPostForm
 from haystack.query import SearchQuerySet
-from .models import Post,Comment, PostFavorite, User, Profile, Contact
+from .models import Post,Comment, PostFavorite, User, Profile, Contact, Action
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
 from django.shortcuts import render, get_object_or_404, redirect
@@ -15,9 +15,7 @@ from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from common.decorators import ajax_required
+from posts.utils import create_action
 
 
 @login_required
@@ -28,6 +26,7 @@ def user_follow (request, to):
 		Contact.objects.filter(user_from=request.user, user_to=user).delete()
 	else:
 		Contact.objects.get_or_create(user_from=request.user, user_to=user)
+		create_action(request.user, 'is following', user)
 	return render(request, 'posts/user_detail.html', {'user': user, 'all_posts': all_posts})
 
 
@@ -46,6 +45,7 @@ def link_post(request):
 			#new_item.slug = slugify('title')
 			new_item.user = request.user
 			new_item.save()
+			create_action(request.user, 'bookmarked image', new_item)
 			for tag in tags:
 				new_item.tags.add(tag)
 			messages.success(request, 'Post added successfully')
@@ -61,6 +61,7 @@ def edit(request):
 		profile_form = ProfileEditForm(instance=request.user.profile, data=request.POST, files=request.FILES)
 		if profile_form.is_valid():
 			profile_form.save()
+			create_action(request.user, 'updated their profile')
 			messages.success(request, 'Profile updated successfully')
 	else:		
 		profile_form = ProfileEditForm(instance=request.user.profile)
@@ -75,6 +76,17 @@ def logout_user(request):
     }
     return render(request, 'posts/login.html', context)
 
+@login_required
+def dashboard (request):
+	# Display all actions by default
+	actions = Action.objects.exclude(user=request.user).select_related('user', 'user__profile').prefetch_related('target')
+	following_ids = request.user.following.values_list('id', flat=True)
+	if following_ids:
+		# If user is following others, retrieve only their actions
+		actions = actions.filter(user_id__in=following_ids)
+	#actions = actions[:10]
+	return render(request, 'posts/dashboard.html', {'section': 'dashboard', 'actions': actions})
+
 def login_user (request, tag_slug = None):
 	if request.method == "POST":
 		username = request.POST['username']
@@ -84,7 +96,6 @@ def login_user (request, tag_slug = None):
 			if user.is_active:
 				login (request, user)
 				all_posts = Post.objects.filter(user=request.user, status="published")
-
 				tag = None
 				if tag_slug:
 					tag = get_object_or_404 (Tag, slug=tag_slug)
@@ -97,7 +108,8 @@ def login_user (request, tag_slug = None):
 					posts = paginator.page(1)
 				except EmptyPage:
 					posts = paginator.page(paginator.num_pages)
-				return render (request, "posts/dashboard.html",{'drafts':Post.objects.filter(user=request.user, status="draft"), 'page': page, 'all_posts': posts, 'tag': tag, 'profile':user.profile})
+				#return render (request, "posts/index.html", {'all_posts': posts, 'page':page, 'tag':tag})
+				return render (request, "posts/profile.html",{'drafts':Post.objects.filter(user=request.user, status="draft"), 'page': page, 'all_posts': posts, 'tag': tag, 'profile':user.profile})
 			else:
 				return render (request, 'posts/login.html', {'error_message': 'Your account has been disabled'})
 		else:
@@ -114,6 +126,7 @@ def register(request):
         password = form.cleaned_data['password']
         user.set_password(password)
         user.save()
+        create_action(user, 'has joined Viberr')
         user = authenticate(username=username, password=password)
         if user is not None:
             if user.is_active:
@@ -147,6 +160,7 @@ def create_post(request):
             post.image = request.FILES['image']
             post.slug=slugify ('title')
             post.save()
+            create_action(request.user, 'created a post titled ', post)
             for tag in tags:
                 post.tags.add(tag)
             return render(request, 'posts/details.html', {'post': post})
@@ -170,7 +184,6 @@ def create_comment(request, post_id):
 		return render (request,'posts/login.html')
 	else:
 		form = CommentForm(request.POST or None, request.FILES or None)
-		
 		post = get_object_or_404(Post, pk=post_id)
 		comments = post.comment_set.filter(active=True)
 		if form.is_valid():
@@ -178,6 +191,7 @@ def create_comment(request, post_id):
 			comment.post = post
 			comment.user = request.user
 			comment.save()
+			create_action(request.user, 'commented on a post titled ', post)
 			return render(request, 'posts/details.html', {'post': post,'new_comment': comment, 'comments':comments})
 		context = {
 			'post': post,
@@ -199,6 +213,7 @@ def add_favorite (request, post_id):
 		else:
 			bookmark=PostFavorite(user=request.user, post=post)
 			bookmark.save()
+			create_action(request.user, 'likes', post)
 		return render(request, 'posts/details.html', {'post': post, 'bookmark':bookmark, 'comments':comments})
 
 
@@ -267,6 +282,7 @@ def post_share(request, post_id):
 			message = 'Read "{}" at {}\n\n{}\'s comments: {}'.format(post.title, post_url, cd['name'], cd['comments'])
 			send_mail(subject, message, 'admin@myblog.com',[cd['to']])
 			sent = True
+			create_action(request.user, 'shared via email a post titled ', post)
 		return render(request, 'posts/share.html', {'post': post,'form': form,'sent':sent,'cd':cd})
 			# ... send email
 	else:
