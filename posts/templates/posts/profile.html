@@ -6,7 +6,17 @@
     <h1>Welcome {{ request.user.username }}!</h1>
 <h2> {{  profile.date_of_birth }} </h2>
     <img src="{{profile.photo.url}}">
-<h3> Your Posts </h3>
+    <h2>Your Activity</h2>
+    {% if actions %}
+<div id="action-list">
+{% for action in actions %}
+{% include "posts/action.html" %}
+{% endfor %}
+</div>
+    {% else %}
+    No activity
+    {% endif %}
+<h3> Your Drafts </h3>
     {% if all_posts %}
 	{% if tag %}
 		<h2>Posts tagged with "{{ tag.name }}"</h2>
@@ -20,7 +30,7 @@
         <img src="{{ im.url }}">
 
 
-		<a href="{{ post.get_absolute_url }}"> {{ post.title }}</a>
+		<a href="{% url 'posts:update_post' post.id %}"> {{ post.title }}</a>
 
 
 		Tags:
@@ -45,14 +55,8 @@
 {% else %}
 	<h2>Zero Posts </h2>
 {% endif %}
-{% include "posts/pagination.html" with page=all_posts %}
-    <h3>Your Drafts</h3>
-    {% for post in drafts %}
-        <li>
-            <a href="{% url 'posts:update_post' post.id %}"> {{ post.title }} </a>
-        </li>
 
-    {% endfor %}
+
 
 {% comment %}
 {% with total_images_created=request.user.images_created.count %}

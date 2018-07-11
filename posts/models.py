@@ -64,7 +64,7 @@ class Post (models.Model):
 		return reverse ('posts:detail', args=[self.publish.year, self.publish.strftime('%m'), self.publish.strftime('%d'), self.slug])
 	
 	def __str__ (self):
-		return self.title+'-'+self.description
+		return self.title+' posted by '+self.user.username
 	
 class Comment (models.Model):
 	user=models.ForeignKey(User, on_delete=models.CASCADE)

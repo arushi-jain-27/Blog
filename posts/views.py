@@ -84,7 +84,7 @@ def dashboard (request):
 	if following_ids:
 		# If user is following others, retrieve only their actions
 		actions = actions.filter(user_id__in=following_ids)
-	#actions = actions[:10]
+	actions = actions[:100]
 	return render(request, 'posts/dashboard.html', {'section': 'dashboard', 'actions': actions})
 
 def login_user (request, tag_slug = None):
@@ -95,21 +95,15 @@ def login_user (request, tag_slug = None):
 		if user is not None:
 			if user.is_active:
 				login (request, user)
-				all_posts = Post.objects.filter(user=request.user, status="published")
+				all_posts = Post.objects.filter(user=request.user, status="draft")
+				actions = Action.objects.filter(user=request.user).select_related('user','user__profile').prefetch_related('target')
 				tag = None
 				if tag_slug:
 					tag = get_object_or_404 (Tag, slug=tag_slug)
 					all_posts = all_posts.filter(tags__in =[tag])
-				paginator = Paginator (all_posts, 10)
-				page = request.GET.get('page')
-				try:
-					posts = paginator.page(page)
-				except PageNotAnInteger:
-					posts = paginator.page(1)
-				except EmptyPage:
-					posts = paginator.page(paginator.num_pages)
+
 				#return render (request, "posts/index.html", {'all_posts': posts, 'page':page, 'tag':tag})
-				return render (request, "posts/profile.html",{'drafts':Post.objects.filter(user=request.user, status="draft"), 'page': page, 'all_posts': posts, 'tag': tag, 'profile':user.profile})
+				return render (request, "posts/profile.html",{'all_posts':all_posts, 'tag': tag, 'profile':user.profile, 'actions':actions})
 			else:
 				return render (request, 'posts/login.html', {'error_message': 'Your account has been disabled'})
 		else:
@@ -173,7 +167,7 @@ def create_post(request):
 		
 class update_post(UpdateView):
 	model=Post
-	fields=['title', 'description', 'body', 'image']
+	fields=['title', 'description', 'body', 'image', 'status']
 	
 class update_comment(UpdateView):
 	model=Comment
