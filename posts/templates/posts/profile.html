@@ -2,10 +2,27 @@
 {% load thumbnail %}
 {% block title %}Profile{% endblock %}
 {% block body %}
-<h1>Your Profile</h1>
-    <h1>Welcome {{ request.user.username }}!</h1>
+    <h1>Your Profile </h1>
+    <h4><a href = {% url "posts:edit" %}> Update Profile  </a></h4>
+    <h4><a href = {% url "posts:password_change" %}> Change Password  </a></h4>
+    <h2>Welcome {{ request.user.username }}!</h2>
+    {% if profile.date_of_birth %}
 <h2> {{  profile.date_of_birth }} </h2>
+    {% endif %}
+    {% if profile.photo %}
     <img src="{{profile.photo.url}}">
+    {% endif %}
+     {% with total_followers=request.user.followers.count %}
+    <span class="count">
+    <span class="total">{{ total_followers }}</span>
+        <a href="{% url "posts:followers" request.user.username %}">follower {{ total_followers }}</a>
+    </span>
+    {% endwith %}
+      {% with total_following=request.user.following.count %}
+    <span class="count">
+        <a href="{% url "posts:followers" request.user.username %}">following {{ total_following }} people </a>
+    </span>
+    {% endwith %}
     <h2>Your Activity</h2>
     {% if actions %}
 <div id="action-list">
@@ -14,9 +31,9 @@
 {% endfor %}
 </div>
     {% else %}
-    No activity
+    <h5>No activity</h5>
     {% endif %}
-<h3> Your Drafts </h3>
+<h2> Your Drafts </h2>
     {% if all_posts %}
 	{% if tag %}
 		<h2>Posts tagged with "{{ tag.name }}"</h2>
@@ -53,7 +70,7 @@
 
 	{% endfor %}
 {% else %}
-	<h2>Zero Posts </h2>
+	<h5>No Drafts </h5>
 {% endif %}
 
 

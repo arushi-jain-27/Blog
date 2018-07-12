@@ -1,5 +1,6 @@
 
 {%  extends "posts/base.html" %}
+{% load thumbnail %}
 {% block body %}
 
 <h1>Welcome {{ request.user.username }}!</h1>
@@ -12,10 +13,12 @@
 		<h2>Posts tagged with "{{ tag.name }}"</h2>
 	{% endif %}
 	{% for post in all_posts %}
-		<li>
+		<p>
 		{% comment %}
 		<a href="{% url 'posts:detail' post.id %}"> {{ post.title }}</a>
 		{% endcomment %}
+        {% thumbnail post.image "180x180" crop="100%" as im %}
+        <img src="{{ im.url }}">
 		<a href="{{ post.get_absolute_url }}"> {{ post.title }}</a>
 		
 		<p class="tags">
@@ -35,10 +38,10 @@
                                 </button>
             </form>
 		
-		</li>
+		</p>
 	{% endfor %}
 {% else %}
-	<h2>Zero Posts </h2>
+	<h5>Zero Posts </h5>
 {% endif %}
 {% include "posts/pagination.html" with page=all_posts %}
 {% endblock %}

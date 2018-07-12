@@ -1,6 +1,35 @@
 {% extends "posts/base.html" %}
+{% block albums_active %}active{% endblock %}
 {% block title %}Link a Post{% endblock %}
 {% block body %}
+<div class="container-fluid">
+
+    <div class="row">
+
+        <div class="col-sm-12 col-md-7">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h3>Link a Post</h3>
+                    {% if error_message %}
+                        <p><strong>{{ error_message }}</strong></p>
+                    {% endif %}
+                    <form class="form-horizontal" role="form" action="." method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% include 'posts/form-template.html' %}
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="submit" class="btn btn-success">Link it!</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+</div>
+</div>
+{% endblock %}
+{% comment %}
 <h1>Link a Post</h1>
 <img src="{{ request.GET.url }}" class="image-preview">
 <form action="." method="post">
@@ -8,4 +37,4 @@
 {% csrf_token %}
 <input type="submit" value="Link it!">
 </form>
-{% endblock %}
+{% endcomment %}

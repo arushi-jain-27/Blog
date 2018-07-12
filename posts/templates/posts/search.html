@@ -19,10 +19,31 @@
 {% endfor %}
 <p><a href="{% url 'posts:post_search' %}">Search again</a></p>
 {% else %}
-<h1>Search for posts</h1>
-<form action="." method="get">
-{{ form.as_p }}
-<input type="submit" value="Search">
-</form>
+
+    <div class="container-fluid">
+
+    <div class="row">
+
+        <div class="col-sm-12 col-md-7">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h1>Search for People or Posts</h1>
+
+                    <form class="form-horizontal" role="form" action="." method="get" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% include 'posts/form-template.html' %}
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="submit" class="btn btn-success">Search!</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+</div>
+</div>
+
 {% endif %}
 {% endblock %}

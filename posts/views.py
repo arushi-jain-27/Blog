@@ -16,6 +16,8 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 from posts.utils import create_action
+from urllib import request
+from django.core.files.base import ContentFile
 
 
 @login_required
@@ -44,11 +46,12 @@ def link_post(request):
 			# assign current user to the item
 			#new_item.slug = slugify('title')
 			new_item.user = request.user
+
 			new_item.save()
 			create_action(request.user, 'bookmarked image', new_item)
 			for tag in tags:
 				new_item.tags.add(tag)
-			messages.success(request, 'Post added successfully')
+			messages.success(request, 'Post linked successfully')
 			# redirect to new created item detail view
 			return redirect(new_item.get_absolute_url())
 	else:
@@ -120,6 +123,9 @@ def register(request):
         password = form.cleaned_data['password']
         user.set_password(password)
         user.save()
+        profile = Profile ()
+        profile.user = user
+        profile.save()
         create_action(user, 'has joined Viberr')
         user = authenticate(username=username, password=password)
         if user is not None:
@@ -141,6 +147,16 @@ def user_detail (request, username):
 	all_posts = Post.objects.filter(status="published", user=user)
 	return render (request, 'posts/user_detail.html', {'user':user, 'all_posts':all_posts})
 
+@login_required
+def follower (request, username):
+	user = get_object_or_404 (User, is_active = True, username = username)
+	return render (request, 'posts/follower.html', {'users': user.followers.all})
+
+@login_required
+def following (request, username):
+	user = get_object_or_404 (User, is_active = True, username = username)
+	return render (request, 'posts/following.html', {'users': user.following.all})
+
 
 def create_post(request):
     if not request.user.is_authenticated:
@@ -152,7 +168,7 @@ def create_post(request):
             post = form.save(commit=False)
             post.user = request.user
             post.image = request.FILES['image']
-            post.slug=slugify ('title')
+            post.slug=slugify (post.title)
             post.save()
             create_action(request.user, 'created a post titled ', post)
             for tag in tags:

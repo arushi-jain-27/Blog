@@ -44,6 +44,7 @@ class SharedPostForm(forms.ModelForm):
 		return image
 
 
+
 class CommentForm(forms.ModelForm):
 
     class Meta:

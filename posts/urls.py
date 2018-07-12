@@ -12,7 +12,7 @@ from . import views
 	path ('posts/<pk>/delete/', views.PostDelete.as_view(), name='post-delete'),   
 """
 app_name='posts'
-
+# Unlinked : link_post, follower list, following list
 urlpatterns = [
 	 
 	 path('tag/<tag_slug>',views.index, name='post_list_by_tag' ),
@@ -43,6 +43,8 @@ urlpatterns = [
 	 #path('<post_id>/', views.detail, name='detail'),
 	 path('<year>/<month>/<day>/<post>', views.detail, name='detail'),
 	 path ('user_list', views.user_list, name = "user_list"),
+	 path ('<username>/followers', views.follower, name = "followers"),
+	 path ('<username>/following', views.following, name = "following"),
 	 path ('user_follow/<to>', views.user_follow, name = "user_follow"),
 	 path ('user_detail/<username>', views.user_detail, name = "user_detail"),
 	 path ('dashboard', views.dashboard, name = "dashboard")

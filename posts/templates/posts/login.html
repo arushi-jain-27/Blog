@@ -1,19 +1,4 @@
-Skip to content
-Features
-Business
-Explore
-Marketplace
-Pricing
-This repository
-Search
-Sign in or Sign up
-74 363 321 buckyroberts/Viberr
- Code  Issues 2  Pull requests 1  Projects 0  Insights
-Viberr/music/templates/music/login.html
-7179fb8  on Mar 28, 2016
-@buckyroberts buckyroberts Initial commit
-     
-52 lines (46 sloc)  2.07 KB
+
 
 {% extends 'posts/base_visitor.html' %}
 
@@ -58,6 +43,7 @@ Viberr/music/templates/music/login.html
                 </div>
                 <div class="panel-footer">
                     Don't have an account? <a href="{% url 'posts:register' %}">Click here</a> to register.
+                    Forgot Password? <a href="{% url 'posts:password_reset' %}">Click here</a> to reset.
                 </div>
             </div>
         </div>

@@ -1,8 +1,8 @@
 {% extends "posts/base.html" %}
 {% load thumbnail %}
-{% block title %}People{% endblock %}
+{% block title %}Followers{% endblock %}
 {% block body %}
-<h1>People</h1>
+<h1>Your Followers</h1>
 <div id="people-list">
 {% for user in users %}
     <div class="info">
@@ -20,9 +20,7 @@
 Unfollow
 {% endif %}
 </a>
-    {% if user in request.user.followers.all %}
-    Follows you
-{% endif %}
+ 
 </div>
 </div>
 <div class="user">

@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Satisfy" type="text/css">
     <link rel="stylesheet" type="text/css" href="{% static 'posts/style.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/blog.css' %}"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script src="{% static 'posts/js/main.js' %}"></script>
@@ -23,16 +24,22 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="{% url 'posts:index' %}">ARUSHI </a>
+			<a class="navbar-brand" href="{% url 'posts:dashboard' %}">VIBERR FEED </a>
 		</div>
 		<div class="collapse navbar-collapse" id="topNavBar">
             <ul class="nav navbar-nav">
-                <li class="{% block posts_active %}{% endblock %}"><a href="{% url 'posts:index' %}"><span class="glyphicon glyphicon-cd" aria-hidden="true"></span>&nbsp; Posts</a></li>
-                
+                <li class="{% block posts_active %}{% endblock %}">
+                    <a href="{% url 'posts:index' %}"><span class="glyphicon glyphicon-cd" aria-hidden="true"></span>&nbsp; Posts</a>
+
+
+                </li>
+                <li> <a href="{% url 'posts:user_list' %}"><span class="glyphicon glyphicon-cd" aria-hidden="true"></span> People</a></li>
+
             </ul>
-            <form class="navbar-form navbar-left" role="search" method="get" action="{% url 'posts:index' %}">
+
+            <form class="navbar-form navbar-left" role="search" method="get" action="{% url 'posts:post_search' %}">
                 <div class="form-group">
-                    <input type="text" class="form-control" name="q" value="{{ request.GET.q }}">
+                    <input type="text" class="form-control" name="query" value="{{ request.GET.query }}">
                 </div>
                 <button type="submit" class="btn btn-default">Search</button>
             </form>
@@ -73,7 +80,7 @@
 <p> {% total_posts %} posts so far.</p>
 <h3>Latest posts</h3>
 {% show_latest_posts 3 %}
-</div>
+
 <h3>Most commented posts</h3>
 {% get_most_commented_posts as most_commented_posts %}
 <ul>
@@ -83,6 +90,7 @@
 </li>
 {% endfor %}
 </ul>
+</div>
 {% block body %}
 {% endblock %}
 </body>

@@ -7,11 +7,32 @@
 "{{ post.title }}" was successfully sent to {{ cd.to }}.
 </p>
 {% else %}
-<h1>Share "{{ post.title }}" by e-mail</h1>
-<form action="." method="post">
-{{ form.as_p }}
-{% csrf_token %}
-<input type="submit" value="Send e-mail">
-</form>
+    <div class="container-fluid">
+
+    <div class="row">
+
+        <div class="col-sm-12 col-md-7">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h1>Share "{{ post.title }}" by e-mail</h1>
+                    {% if error_message %}
+                        <p><strong>{{ error_message }}</strong></p>
+                    {% endif %}
+                    <form class="form-horizontal" role="form" action="" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% include 'posts/form-template.html' %}
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="submit" class="btn btn-success">Send E-mail</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+</div>
+</div>
+
 {% endif %}
 {% endblock %}

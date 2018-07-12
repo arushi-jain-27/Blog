@@ -4,8 +4,12 @@
 {% block body %}
 
     <h1>{{ user.username }}'s Profile</h1>
-<h2>Born  {{  user.profile.date_of_birth }} </h2>
-    <img src="{{user.profile.photo.url}}">
+{% if profile.date_of_birth %}
+<h2> Born {{  profile.date_of_birth }} </h2>
+    {% endif %}
+    {% if profile.photo %}
+    <img src="{{profile.photo.url}}">
+    {% endif %}
 <h3> {{ user.username }}'s Posts </h3>
     {% if all_posts %}
 	{% if tag %}
@@ -36,7 +40,7 @@
 
 	{% endfor %}
 {% else %}
-	<h2>Zero Posts </h2>
+	<h4>Zero Posts </h4>
 {% endif %}
     {% with total_followers=user.followers.count %}
 <span class="count">
@@ -56,6 +60,9 @@ follows {{ total_following }} people
 Unfollow
 {% endif %}
 </a>
+    {% if user in request.user.followers.all %}
+    Follows you
+{% endif %}
 
 
 
