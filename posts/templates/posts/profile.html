@@ -15,12 +15,12 @@
      {% with total_followers=request.user.followers.count %}
     <span class="count">
     <span class="total">{{ total_followers }}</span>
-        <a href="{% url "posts:followers" request.user.username %}">follower {{ total_followers }}</a>
+        <a href="{% url "posts:followers" request.user.username %}" >    followers {{ total_followers }}  </a>
     </span>
     {% endwith %}
       {% with total_following=request.user.following.count %}
     <span class="count">
-        <a href="{% url "posts:followers" request.user.username %}">following {{ total_following }} people </a>
+        <a href="{% url "posts:followers" request.user.username %}" > following {{ total_following }} people </a>
     </span>
     {% endwith %}
     <h2>Your Activity</h2>
@@ -48,6 +48,7 @@
 
 
 		<a href="{% url 'posts:update_post' post.id %}"> {{ post.title }}</a>
+        <a href="{% url 'posts:publish' post.id %}"> Publish</a>
 
 
 		Tags:

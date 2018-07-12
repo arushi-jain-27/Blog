@@ -12,7 +12,7 @@ from . import views
 	path ('posts/<pk>/delete/', views.PostDelete.as_view(), name='post-delete'),   
 """
 app_name='posts'
-# Unlinked : link_post, follower list, following list
+# Unlinked : link_post
 urlpatterns = [
 	 
 	 path('tag/<tag_slug>',views.index, name='post_list_by_tag' ),
@@ -21,9 +21,11 @@ urlpatterns = [
 	 path('create_post/', views.create_post, name='create_post'),
 	 path ('link_post/', views.link_post, name='link_post'),
 	 path('update_post/<pk>', views.update_post.as_view(), name='update_post'),
+	#path('update_post/<pk>', views.update_post, name='update_post'),
 	 path('update_comment/<pk>', views.update_comment.as_view(), name='update_comment'),
 	 path('<post_id>/create_comment/', views.create_comment, name='create_comment'),
 	 path('<post_id>/delete_post/', views.delete_post, name='delete_post'),
+	 path('<post_id>/publish_post/', views.publish_post, name='publish'),
 	 path('<post_id>/delete_comment/<comment_id>', views.delete_comment, name='delete_comment'),
 	 path ('register/', views.register, name='register'),
 	 path ('edit/', views.edit, name='edit'),
